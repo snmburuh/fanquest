@@ -1,0 +1,17 @@
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\bin\Debug\net9.0\FanQuest.Infrastructure.deps.json
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\bin\Debug\net9.0\FanQuest.Infrastructure.dll
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\bin\Debug\net9.0\FanQuest.Infrastructure.pdb
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\bin\Debug\net9.0\FanQuest.Application.dll
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\bin\Debug\net9.0\FanQuest.Domain.dll
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\bin\Debug\net9.0\FanQuest.Domain.pdb
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\bin\Debug\net9.0\FanQuest.Application.pdb
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\FanQuest.Infrastructure.csproj.AssemblyReference.cache
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\FanQuest.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\FanQuest.Infrastructure.AssemblyInfoInputs.cache
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\FanQuest.Infrastructure.AssemblyInfo.cs
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\FanQuest.Infrastructure.csproj.CoreCompileInputs.cache
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\FanQuest.EA5201F0.Up2Date
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\FanQuest.Infrastructure.dll
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\refint\FanQuest.Infrastructure.dll
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\FanQuest.Infrastructure.pdb
+D:\SAM\Code\Urion\FanQuest\src\FanQuest.Infrastructure\obj\Debug\net9.0\ref\FanQuest.Infrastructure.dll

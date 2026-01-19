@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "2iT1B0yD3cE=",
+  "success": true,
+  "projectFilePath": "D:\\SAM\\Code\\Urion\\FanQuest\\src\\FanQuest.Application\\FanQuest.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\PC\\.nuget\\packages\\fluentvalidation\\12.1.1\\fluentvalidation.12.1.1.nupkg.sha512"
+  ],
+  "logs": []
+}
