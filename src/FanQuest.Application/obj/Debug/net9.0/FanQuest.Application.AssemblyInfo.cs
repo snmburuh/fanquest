@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FanQuest.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+38cc6c25601ffd35de8e62761f4737f0bdf2bd0a")]
 [assembly: System.Reflection.AssemblyProductAttribute("FanQuest.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FanQuest.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
