@@ -2,12 +2,14 @@
 using FanQuest.Application.DTOs;
 using FanQuest.Application.Interfaces.Repositories;
 using FanQuest.Application.UseCases.JoinQuest;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FanQuest.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class QuestsController : ControllerBase
     {
         private readonly IQuestRepository _questRepo;

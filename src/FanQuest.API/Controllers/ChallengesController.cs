@@ -2,12 +2,14 @@
 using FanQuest.Application.DTOs;
 using FanQuest.Application.Interfaces.Repositories;
 using FanQuest.Application.UseCases.CompleteChallenge;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FanQuest.API.Controllers
 {
     [ApiController]
     [Route("api/quests/{questId}/[controller]")]
+    [Authorize]
     public class ChallengesController : ControllerBase
     {
         private readonly IQuestRepository _questRepo;

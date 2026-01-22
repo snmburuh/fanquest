@@ -8,5 +8,5 @@
 
     public record ClaimRewardRequest(Guid QuestId, string PhoneNumber);
     public record MpesaCallbackDto(string MerchantRequestID, string CheckoutRequestID, int ResultCode, string ResultDesc);
-
+    public record Login_Request(string PhoneNumber, string? DisplayName);
 }

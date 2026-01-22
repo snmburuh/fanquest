@@ -6,7 +6,11 @@ namespace FanQuest.Infrastructure.Persistence
 {
     public class FanQuestDbContext : DbContext
     {
-        public FanQuestDbContext(DbContextOptions<FanQuestDbContext> options) : base(options) { }
+        // Constructor must accept DbContextOptions<FanQuestDbContext>
+        public FanQuestDbContext(DbContextOptions<FanQuestDbContext> options)
+            : base(options)
+        {
+        }
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Quest> Quests => Set<Quest>();

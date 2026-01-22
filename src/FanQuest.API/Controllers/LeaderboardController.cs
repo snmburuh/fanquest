@@ -1,10 +1,12 @@
 ﻿using FanQuest.Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FanQuest.API.Controllers
 {
     [ApiController]
     [Route("api/quests/{questId}/[controller]")]
+    [Authorize]
     public class LeaderboardController : ControllerBase
     {
         private readonly ILeaderboardService _leaderboardService;

@@ -1,11 +1,13 @@
 ﻿using FanQuest.API.Contract;
 using FanQuest.Application.UseCases.ClaimReward;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FanQuest.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PaymentsController : ControllerBase
     {
         private readonly ClaimRewardHandler _claimRewardHandler;
