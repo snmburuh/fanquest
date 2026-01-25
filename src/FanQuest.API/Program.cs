@@ -1,4 +1,6 @@
-﻿using FanQuest.API.Hubs;
+﻿using FanQuest.API.Configuration;
+using FanQuest.API.Data;
+using FanQuest.API.Hubs;
 using FanQuest.API.Services;
 using FanQuest.Application.Interfaces.Repositories;
 using FanQuest.Application.Interfaces.Services;
@@ -10,9 +12,13 @@ using FanQuest.Infrastructure.Caching;
 using FanQuest.Infrastructure.Payments.Mpesa;
 using FanQuest.Infrastructure.Persistence;
 using FanQuest.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using StackExchange.Redis;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,7 +81,53 @@ if (!string.IsNullOrEmpty(redisConnection))
     }
 }
 
+// JWT Configuration
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+builder.Services.Configure<JwtSettings>(jwtSettings);
+builder.Services.AddScoped<JwtTokenService>();
 
+// Authentication
+var jwtSecret = jwtSettings.Get<JwtSettings>()?.Secret ?? throw new InvalidOperationException("JWT Secret not configured");
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+options.TokenValidationParameters = new TokenValidationParameters
+{
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+    ValidateIssuer = true,
+    ValidIssuer = jwtSettings.Get<JwtSettings>()?.Issuer,
+    ValidateAudience = true,
+    ValidAudience = jwtSettings.Get<JwtSettings>()?.Audience,
+    ValidateLifetime = true,
+    ClockSkew = TimeSpan.Zero
+};
+
+
+
+
+    // SignalR support
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
+
+builder.Services.AddAuthorization();
 
 // SignalR
 builder.Services.AddSignalR();
@@ -86,12 +138,13 @@ builder.Services.AddScoped<IQuestRepository, QuestRepository>();
 builder.Services.AddScoped<IParticipationRepository, ParticipationRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IRewardRepository, RewardRepository>(); // ← ADDED
-
+builder.Services.AddScoped<IChallengeRepository, ChallengeRepository>();
 // Services
 builder.Services.AddScoped<ILeaderboardService, RedisLeaderboardService>();
 builder.Services.AddScoped<IPaymentService, MpesaPaymentService>();
 
-builder.Services.AddScoped<QuestNotificationService>();
+builder.Services.AddSingleton<QuestNotificationService>();
+builder.Services.AddScoped<JwtTokenService>();
 
 // Challenge Rules
 builder.Services.AddScoped<IChallengeRule, TimeWindowRule>();
@@ -123,6 +176,7 @@ builder.Services.AddCors(options =>
 
 // M-Pesa Configuration
 builder.Services.Configure<MpesaConfig>(builder.Configuration.GetSection("Mpesa"));
+builder.Services.AddHostedService<QuestCompletionService>();
 
 var app = builder.Build();
 
@@ -134,6 +188,8 @@ using (IServiceScope scope = app.Services.CreateScope())
     {
         FanQuestDbContext context = scope.ServiceProvider.GetRequiredService<FanQuestDbContext>();
         if (context.Database.IsSqlServer()) { context.Database.Migrate(); }
+
+        await SeedData.Initialize(scope.ServiceProvider);
     }
     catch (Exception ex)
     {
@@ -149,10 +205,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("MiniAppPolicy");
+
+// Authentication & Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
-app.UseCors("MiniAppPolicy");
-app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<QuestHub>("/hubs/quest");

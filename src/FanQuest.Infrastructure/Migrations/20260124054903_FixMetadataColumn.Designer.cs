@@ -4,6 +4,7 @@ using FanQuest.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FanQuest.Infrastructure.Migrations
 {
     [DbContext(typeof(FanQuestDbContext))]
-    partial class FanQuestDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260124054903_FixMetadataColumn")]
+    partial class FixMetadataColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,9 +36,7 @@ namespace FanQuest.Infrastructure.Migrations
 
                     b.Property<string>("Metadata")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("{}");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("OpensAt")
                         .HasColumnType("datetime2");
