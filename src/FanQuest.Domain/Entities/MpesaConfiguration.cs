@@ -10,8 +10,15 @@
             public string Passkey { get; private set; }
             public string CallbackUrl { get; private set; }
             public MpesaEnvironment Environment { get; private set; }
+        public string StkCallbackUrl { get; set; }
+        public string InitiatorName { get; set; }
+        public string SecurityCredential { get; set; }
+        public string B2CQueueTimeoutUrl { get; set; }
+        public string B2CResultUrl { get; set; }
+        public double CallbackTimeoutMinutes { get; set; }
+        public string BaseUrl { get; set; }
 
-            protected MpesaConfiguration() { }
+        protected MpesaConfiguration() { }
 
             public MpesaConfiguration(
                 Guid tenantId,

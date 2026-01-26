@@ -1,10 +1,13 @@
-﻿using FanQuest.Infrastructure.Payments.Models;
+﻿using FanQuest.Domain.Entities;
+using FanQuest.Infrastructure.Payments.Models;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -14,17 +17,22 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
     public class MpesaClient : IMpesaClient
     {
         private readonly HttpClient _httpClient;
+        private readonly IMpesaConfigService _configService;
+        private readonly IConfiguration _configuration;
         private readonly ILogger<MpesaClient> _logger;
         private readonly IMemoryCache _cache;
 
-        public MpesaClient(HttpClient httpClient, ILogger<MpesaClient> logger, IMemoryCache cache)
+        public MpesaClient(HttpClient httpClient, IMpesaConfigService configService,
+        IConfiguration configuration, ILogger<MpesaClient> logger, IMemoryCache cache)
         {
             _httpClient = httpClient;
+            _configService = configService;
+            _configuration = configuration;
             _logger = logger;
             _cache = cache;
         }
 
-        public async Task<string> GetAccessTokenAsync(MpesaConfig config)
+        public async Task<string> GetAccessTokenAsync(MpesaConfiguration config)
         {
             var cacheKey = $"mpesa_token_{config.ConsumerKey}";
 
@@ -61,40 +69,51 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
             }
         }
 
-        public async Task<StkPushResponse> InitiateStkPushAsync(MpesaConfig config, StkPushRequest request)
+        public async Task<StkPushResponse> InitiateStkPushAsync(
+         StkPushRequest request,
+         Guid tenantId)
         {
-            try
-            {
-                var token = await GetAccessTokenAsync(config);
+            var config = await _configService.GetConfigurationAsync(tenantId);
+            var token = await GetAccessTokenAsync(config);
 
-                var httpRequest = new HttpRequestMessage(HttpMethod.Post,
-                    $"{config.BaseUrl}/mpesa/stkpush/v1/processrequest");
-                httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                httpRequest.Content = new StringContent(
-                    JsonSerializer.Serialize(request),
-                    Encoding.UTF8,
-                    "application/json"
-                );
+            var baseUrl = config.Environment == MpesaEnvironment.Sandbox
+                ? _configuration["Mpesa:SandboxUrl"]
+                : _configuration["Mpesa:ProductionUrl"];
 
-                var response = await _httpClient.SendAsync(httpRequest);
-                var content = await response.Content.ReadAsStringAsync();
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogError("STK Push failed: {Content}", content);
-                    throw new MpesaException($"STK Push failed: {content}");
-                }
+            var response = await _httpClient.PostAsJsonAsync(
+                $"{baseUrl}/mpesa/stkpush/v1/processrequest",
+                request);
 
-                return JsonSerializer.Deserialize<StkPushResponse>(content);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error initiating STK Push");
-                throw;
-            }
+            return await response.Content.ReadFromJsonAsync<StkPushResponse>()
+                ?? throw new InvalidOperationException("Failed to parse M-Pesa response");
         }
 
-        public async Task<B2CResponse> InitiateB2CAsync(MpesaConfig config, B2CRequest request)
+        public async Task<B2CResponse> InitiateB2CAsync(
+            B2CRequest request,
+            Guid tenantId)
+        {
+            var config = await _configService.GetConfigurationAsync(tenantId);
+            var token = await GetAccessTokenAsync(config);
+
+            var baseUrl = config.Environment == MpesaEnvironment.Sandbox
+                ? _configuration["Mpesa:SandboxUrl"]
+                : _configuration["Mpesa:ProductionUrl"];
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.PostAsJsonAsync(
+                $"{baseUrl}/mpesa/b2c/v1/paymentrequest",
+                request);
+
+            return await response.Content.ReadFromJsonAsync<B2CResponse>()
+                ?? throw new InvalidOperationException("Failed to parse M-Pesa response");
+        }
+
+        public async Task<B2CResponse> InitiateB2CAsync(MpesaConfiguration config, B2CRequest request)
         {
             try
             {
@@ -128,7 +147,7 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
         }
 
         public async Task<TransactionStatusResponse> QueryTransactionStatusAsync(
-            MpesaConfig config,
+            MpesaConfiguration config,
             TransactionStatusRequest request)
         {
             try
@@ -160,6 +179,16 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
                 _logger.LogError(ex, "Error querying transaction status");
                 throw;
             }
+        }
+
+        public Task<TransactionStatusResponse> QueryTransactionStatusAsync(string transactionId, Guid tenantId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> GetAccessTokenAsync(Guid tenantId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

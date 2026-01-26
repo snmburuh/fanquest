@@ -4,6 +4,7 @@ using FanQuest.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FanQuest.Infrastructure.Migrations
 {
     [DbContext(typeof(FanQuestDbContext))]
-    partial class FanQuestDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260126185557_AddTenantAndMpesaConfiguration")]
+    partial class AddTenantAndMpesaConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,24 +101,9 @@ namespace FanQuest.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("B2CQueueTimeoutUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("B2CResultUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BaseUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("BusinessShortCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("CallbackTimeoutMinutes")
-                        .HasColumnType("float");
 
                     b.Property<string>("CallbackUrl")
                         .IsRequired()
@@ -132,19 +120,7 @@ namespace FanQuest.Infrastructure.Migrations
                     b.Property<int>("Environment")
                         .HasColumnType("int");
 
-                    b.Property<string>("InitiatorName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Passkey")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SecurityCredential")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StkCallbackUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

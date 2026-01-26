@@ -7,6 +7,7 @@ using FanQuest.Application.Interfaces.Services;
 using FanQuest.Application.UseCases.ClaimReward;
 using FanQuest.Application.UseCases.CompleteChallenge;
 using FanQuest.Application.UseCases.JoinQuest;
+using FanQuest.Domain.Entities;
 using FanQuest.Domain.Rules;
 using FanQuest.Infrastructure.Caching;
 using FanQuest.Infrastructure.Payments.Models;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using StackExchange.Redis;
 using System.Text;
@@ -143,15 +145,15 @@ builder.Services.AddScoped<IRewardRepository, RewardRepository>(); // ← ADDED
 builder.Services.AddScoped<IChallengeRepository, ChallengeRepository>();
 // Services
 builder.Services.AddScoped<ILeaderboardService, RedisLeaderboardService>();
+// M-Pesa Services
+builder.Services.AddHttpClient<IMpesaClient, MpesaClient>();
+builder.Services.AddScoped<IMpesaConfigService, MpesaConfigService>();
 builder.Services.AddScoped<IPaymentService, MpesaPaymentService>();
 // Add after existing repository registrations
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 
 // Add after existing service registrations
 builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
-
-// Add MediatR if not already registered
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 
 builder.Services.AddSingleton<QuestNotificationService>();
@@ -168,10 +170,9 @@ builder.Services.AddScoped<IChallengeRule>(sp =>
 builder.Services.AddScoped<IChallengeRule, LocationRule>();
 builder.Services.AddScoped<ChallengeRuleEngine>();
 
-// Use Cases
-builder.Services.AddScoped<JoinQuestHandler>();
-builder.Services.AddScoped<CompleteChallengeHandler>();
-builder.Services.AddScoped<ClaimRewardHandler>();
+// MediatR
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(JoinQuestHandler).Assembly));
 
 // CORS for Mini App
 builder.Services.AddCors(options =>
@@ -186,8 +187,49 @@ builder.Services.AddCors(options =>
 });
 
 // M-Pesa Configuration
-builder.Services.Configure<MpesaConfig>(builder.Configuration.GetSection("Mpesa"));
+builder.Services.Configure<MpesaConfiguration>(builder.Configuration.GetSection("Mpesa"));
 builder.Services.AddHostedService<QuestCompletionService>();
+
+// Add Swagger/OpenAPI - ADD THIS SECTION
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "FanQuest API",
+        Description = "Gamified fan engagement platform API for M-Pesa Mini App",
+        Contact = new OpenApiContact
+        {
+            Name = "FanQuest Team"
+        }
+    });
+
+    // Add JWT Authentication to Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -210,11 +252,15 @@ using (IServiceScope scope = app.Services.CreateScope())
 }
 
 
-// Configure the HTTP request pipeline
+// Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "FanQuest API v1");
+        options.RoutePrefix = string.Empty; // Makes Swagger UI the root page
+    });
 }
 app.UseCors("MiniAppPolicy");
 

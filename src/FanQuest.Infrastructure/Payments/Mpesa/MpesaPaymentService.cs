@@ -44,7 +44,7 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
                     throw new ArgumentException("Quest not found");
 
                 // Get tenant-specific M-Pesa config
-                var config = await _configService.GetConfigForTenantAsync(quest.TenantId);
+                var config = await _configService.GetConfigurationAsync(quest.TenantId);
 
                 // Create payment record
                 var payment = new Payment(userId, questId, quest.TenantId, quest.EntryFee, PaymentType.Entry, phoneNumber);
@@ -72,7 +72,7 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
                 };
 
                 // Initiate STK Push
-                var response = await _mpesaClient.InitiateStkPushAsync(config, stkRequest);
+                var response = await _mpesaClient.InitiateStkPushAsync(stkRequest, config.TenantId);
 
                 if (response.ResponseCode != "0")
                 {
@@ -119,7 +119,7 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
                     return false;
 
                 // Check callback timeout
-                var config = await _configService.GetConfigForTenantAsync(payment.TenantId);
+                var config = await _configService.GetConfigurationAsync(payment.TenantId);
                 var timeSinceCreation = DateTime.UtcNow - payment.CreatedAt;
 
                 if (timeSinceCreation.TotalMinutes > config.CallbackTimeoutMinutes && payment.LastStatusCheckAt == null)
@@ -148,7 +148,7 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
                     throw new ArgumentException("Quest not found");
 
                 // Get tenant-specific M-Pesa config
-                var config = await _configService.GetConfigForTenantAsync(quest.TenantId);
+                var config = await _configService.GetConfigurationAsync(quest.TenantId);
 
                 // Create payment record
                 var payment = new Payment(userId, questId, quest.TenantId, amount, PaymentType.Reward, phoneNumber);
@@ -173,7 +173,7 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
                 };
 
                 // Initiate B2C
-                var response = await _mpesaClient.InitiateB2CAsync(config, b2cRequest);
+                var response = await _mpesaClient.InitiateB2CAsync(b2cRequest, config.TenantId);
 
                 if (response.ResponseCode != "0")
                 {
@@ -201,7 +201,7 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
             }
         }
 
-        private async Task QueryPaymentStatusAsync(Payment payment, MpesaConfig config)
+        private async Task QueryPaymentStatusAsync(Payment payment, MpesaConfiguration config)
         {
             try
             {
@@ -230,7 +230,7 @@ namespace FanQuest.Infrastructure.Payments.Mpesa
                     Occasion = $"Payment-{payment.Id}"
                 };
 
-                await _mpesaClient.QueryTransactionStatusAsync(config, statusRequest);
+                await _mpesaClient.QueryTransactionStatusAsync(statusRequest.TransactionID, config.TenantId);
 
                 _logger.LogInformation("Transaction status query initiated for payment {PaymentId}", payment.Id);
             }
