@@ -19,6 +19,8 @@ namespace FanQuest.Infrastructure.Persistence
         public DbSet<Completion> Completions => Set<Completion>();
         public DbSet<Reward> Rewards => Set<Reward>();
         public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<Tenant> Tenants { get; set; }
+        public DbSet<MpesaConfiguration> MpesaConfigurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -102,6 +104,26 @@ namespace FanQuest.Infrastructure.Persistence
                 entity.Property(e => e.Status).HasConversion<string>();
                 entity.Property(e => e.MpesaReceipt).HasMaxLength(100);
                 entity.HasIndex(e => e.MpesaReceipt);
+            });
+
+            modelBuilder.Entity<Tenant>(entity =>
+            {
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.Name).IsRequired().HasMaxLength(200);
+                entity.Property(t => t.ApiKey).IsRequired().HasMaxLength(100);
+                entity.HasIndex(t => t.ApiKey).IsUnique();
+
+                entity.HasOne(t => t.MpesaConfiguration)
+                    .WithOne()
+                    .HasForeignKey<MpesaConfiguration>(m => m.TenantId);
+            });
+
+            // Add MpesaConfiguration configuration
+            modelBuilder.Entity<MpesaConfiguration>(entity =>
+            {
+                entity.HasKey(m => m.Id);
+                entity.Property(m => m.ConsumerKey).IsRequired();
+                entity.Property(m => m.ConsumerSecret).IsRequired();
             });
         }
     }

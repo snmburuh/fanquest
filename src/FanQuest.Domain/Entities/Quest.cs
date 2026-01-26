@@ -5,6 +5,7 @@ namespace FanQuest.Domain.Entities
     public class Quest
     {
         public Guid Id { get; private set; }
+        public Guid TenantId { get; private set; }
         public string Name { get; private set; }
         public string City { get; private set; }
         public DateTime StartsAt { get; private set; }
@@ -18,12 +19,13 @@ namespace FanQuest.Domain.Entities
 
         protected Quest() { } // EF Core
 
-        public Quest(string name, string city, DateTime startsAt, DateTime endsAt, decimal entryFee)
+        public Quest(string name, string city, DateTime startsAt, DateTime endsAt, decimal entryFee, Guid tenantId)
         {
             if (startsAt >= endsAt)
                 throw new ArgumentException("Start time must be before end time");
 
             Id = Guid.NewGuid();
+            TenantId = tenantId;
             Name = name ?? throw new ArgumentNullException(nameof(name));
             City = city ?? throw new ArgumentNullException(nameof(city));
             StartsAt = startsAt;
@@ -31,6 +33,15 @@ namespace FanQuest.Domain.Entities
             EntryFee = entryFee;
             Status = QuestStatus.Draft;
             CreatedAt = DateTime.UtcNow;
+        }
+
+        public Quest(string name, string city, DateTime startsAt, DateTime endsAt, decimal entryFee)
+        {
+            Name = name;
+            City = city;
+            StartsAt = startsAt;
+            EndsAt = endsAt;
+            EntryFee = entryFee;
         }
 
         public void Publish()

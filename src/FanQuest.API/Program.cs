@@ -9,9 +9,11 @@ using FanQuest.Application.UseCases.CompleteChallenge;
 using FanQuest.Application.UseCases.JoinQuest;
 using FanQuest.Domain.Rules;
 using FanQuest.Infrastructure.Caching;
+using FanQuest.Infrastructure.Payments.Models;
 using FanQuest.Infrastructure.Payments.Mpesa;
 using FanQuest.Infrastructure.Persistence;
 using FanQuest.Infrastructure.Repositories;
+using FanQuest.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -142,6 +144,15 @@ builder.Services.AddScoped<IChallengeRepository, ChallengeRepository>();
 // Services
 builder.Services.AddScoped<ILeaderboardService, RedisLeaderboardService>();
 builder.Services.AddScoped<IPaymentService, MpesaPaymentService>();
+// Add after existing repository registrations
+builder.Services.AddScoped<ITenantRepository, TenantRepository>();
+
+// Add after existing service registrations
+builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
+
+// Add MediatR if not already registered
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 
 builder.Services.AddSingleton<QuestNotificationService>();
 builder.Services.AddScoped<JwtTokenService>();

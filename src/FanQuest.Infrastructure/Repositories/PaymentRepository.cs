@@ -30,5 +30,21 @@ namespace FanQuest.Infrastructure.Repositories
             _context.Payments.Update(payment);
             await _context.SaveChangesAsync();
         }
+
+        public async Task AddAsync(Payment payment)
+        {
+            await _context.Payments.AddAsync(payment);
+            await _context.SaveChangesAsync();
+        }
+
+        public Task<Payment> GetByCheckoutRequestIdAsync(string checkoutRequestId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Payment> GetByConversationIdAsync(string conversationId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

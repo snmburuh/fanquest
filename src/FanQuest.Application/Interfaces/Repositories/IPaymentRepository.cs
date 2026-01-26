@@ -12,5 +12,8 @@ namespace FanQuest.Application.Interfaces.Repositories
         Task<Payment?> GetByIdAsync(Guid id);
         Task<Payment> CreateAsync(Payment payment);
         Task UpdateAsync(Payment payment);
+        Task AddAsync(Payment payment);
+        Task<Payment> GetByCheckoutRequestIdAsync(string checkoutRequestId);
+        Task<Payment> GetByConversationIdAsync(string conversationId);
     }
 }

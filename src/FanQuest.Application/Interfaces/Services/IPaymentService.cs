@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FanQuest.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,9 @@ namespace FanQuest.Application.Interfaces.Services
 {
     public interface IPaymentService
     {
-        Task<string> InitiateEntryFeeAsync(Guid userId, Guid questId, decimal amount, string phoneNumber);
-        Task<bool> VerifyPaymentAsync(string mpesaReceipt);
-        Task InitiateRewardPayoutAsync(Guid userId, decimal amount, string phoneNumber);
+        Task<Payment> InitiateEntryFeeAsync(Guid userId, Guid questId, decimal entryFee, string phoneNumber);
+        Task<bool> VerifyPaymentAsync(Guid paymentId);
+        Task<Payment> InitiateRewardPayoutAsync(Guid userId, Guid questId, decimal amount, string phoneNumber);
+        Task InitiateRewardPayoutAsync(Guid userId, decimal value, string phoneNumber);
     }
 }
