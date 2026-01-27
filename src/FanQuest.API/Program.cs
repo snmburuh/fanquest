@@ -1,6 +1,9 @@
-﻿using FanQuest.API.Configuration;
+﻿using AspNetCoreRateLimit;
+using FanQuest.API.Configuration;
+using FanQuest.API.Configuration.FanQuest.API.Configuration;
 using FanQuest.API.Data;
 using FanQuest.API.Hubs;
+using FanQuest.API.Middleware;
 using FanQuest.API.Services;
 using FanQuest.Application.Interfaces.Repositories;
 using FanQuest.Application.Interfaces.Services;
@@ -230,6 +233,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+builder.Services.AddRateLimiting(builder.Configuration);
 
 var app = builder.Build();
 
@@ -263,7 +267,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.UseCors("MiniAppPolicy");
-
+app.UseIpRateLimiting();
+app.UseMiddleware<CustomRateLimitMiddleware>();
 // Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
