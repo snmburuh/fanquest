@@ -19,6 +19,10 @@ namespace FanQuest.API.Configuration
             // Register processing strategy
             services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 
+            // CRITICAL: Register the configuration resolver
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+
             return services;
         }
     }
