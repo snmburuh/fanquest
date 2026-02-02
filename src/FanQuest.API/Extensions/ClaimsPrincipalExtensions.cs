@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace FanQuest.API.Extensions
 {
@@ -7,25 +6,40 @@ namespace FanQuest.API.Extensions
     {
         public static Guid GetUserId(this ClaimsPrincipal principal)
         {
-            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
-               ?? principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)
+                              ?? principal.FindFirst("sub")
+                              ?? principal.FindFirst("userId");
 
-            if (string.IsNullOrEmpty(userIdClaim))
+            if (userIdClaim == null)
                 throw new UnauthorizedAccessException("User ID not found in token");
 
-            return Guid.Parse(userIdClaim);
+            if (!Guid.TryParse(userIdClaim.Value, out var userId))
+                throw new UnauthorizedAccessException("Invalid user ID format");
+
+            return userId;
         }
 
         public static string GetPhoneNumber(this ClaimsPrincipal principal)
         {
-            return principal.FindFirst("phone_number")?.Value
-                ?? throw new UnauthorizedAccessException("Phone number not found in token");
+            var phoneNumberClaim = principal.FindFirst(ClaimTypes.MobilePhone)
+                                   ?? principal.FindFirst("phone_number")
+                                   ?? principal.FindFirst("phoneNumber");
+
+            if (phoneNumberClaim == null)
+                throw new UnauthorizedAccessException("Phone number not found in token");
+
+            return phoneNumberClaim.Value;
         }
 
         public static string GetDisplayName(this ClaimsPrincipal principal)
         {
-            return principal.FindFirst(ClaimTypes.Name)?.Value
-                ?? throw new UnauthorizedAccessException("Display name not found in token");
+            var Name = principal.FindFirst(ClaimTypes.Name)
+                                   ?? principal.FindFirst("phone_number")
+                                   ?? principal.FindFirst("phoneNumber");
+            if (Name == null)
+                throw new UnauthorizedAccessException("Display name not found in token");
+
+            return Name.Value;
         }
     }
 }

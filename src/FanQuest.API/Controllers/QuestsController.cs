@@ -1,9 +1,12 @@
 ﻿using FanQuest.API.Contract;
+using FanQuest.API.Extensions;
 using FanQuest.Application.DTOs;
 using FanQuest.Application.Interfaces.Repositories;
 using FanQuest.Application.UseCases.JoinQuest;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FanQuest.API.Controllers
 {
@@ -69,12 +72,16 @@ namespace FanQuest.API.Controllers
             return Ok(dto);
         }
 
-        [HttpPost("{id}/join")]
-        public async Task<IActionResult> JoinQuest(Guid id, [FromBody] JoinQuestRequest request)
+        [HttpPost("{questId}/join")]
+        public async Task<IActionResult> JoinQuest(Guid questId, [FromBody] JoinQuestRequest request)
         {
-            var userId = GetUserId(); // Extract from auth token
+            var userId = GetUserId(); // Your method to extract user ID from token/session
 
-            var command = new JoinQuestCommand(userId, id, request.PhoneNumber);
+            var command = new JoinQuestCommand(
+                userId,
+                questId,
+                request.PhoneNumber);
+
             var result = await _joinQuestHandler.HandleAsync(command);
 
             if (!result.IsSuccess)
@@ -85,11 +92,7 @@ namespace FanQuest.API.Controllers
 
         private Guid GetUserId()
         {
-            // TODO: Extract from JWT claims
-            // return Guid.Parse(User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
-
-            // Mock for now
-            return Guid.NewGuid();
+            return User.GetUserId();
         }
     }
 }

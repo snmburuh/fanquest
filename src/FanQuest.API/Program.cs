@@ -24,6 +24,24 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ============================================
+// ADD THIS: Configure CORS
+// ============================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000",     // React dev server
+                "http://localhost:5173",     // Vite dev server (if using Vite)
+                "https://yourdomain.com"     // Production frontend URL
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+
 builder.Host.UseSerilog((context, configuration) =>
 {
 
@@ -229,7 +247,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 builder.Services.AddRateLimiting(builder.Configuration);
-
+// Register Application Layer Services
+builder.Services.AddScoped<JoinQuestHandler>();
 var app = builder.Build();
 
 using (IServiceScope scope = app.Services.CreateScope())
@@ -261,7 +280,7 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty; // Makes Swagger UI the root page
     });
 }
-app.UseCors("MiniAppPolicy");
+app.UseCors("AllowFrontend");
 app.UseIpRateLimiting();
 app.UseMiddleware<CustomRateLimitMiddleware>();
 // Authentication & Authorization
