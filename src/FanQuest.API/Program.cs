@@ -6,6 +6,8 @@ using FanQuest.API.Middleware;
 using FanQuest.API.Services;
 using FanQuest.Application.Interfaces.Repositories;
 using FanQuest.Application.Interfaces.Services;
+using FanQuest.Application.UseCases.ClaimReward;
+using FanQuest.Application.UseCases.CompleteChallenge;
 using FanQuest.Application.UseCases.JoinQuest;
 using FanQuest.Domain.Entities;
 using FanQuest.Domain.Rules;
@@ -190,6 +192,14 @@ builder.Services.AddScoped<ChallengeRuleEngine>();
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(JoinQuestHandler).Assembly));
 
+// MediatR
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(CompleteChallengeHandler).Assembly)); 
+
+// MediatR
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(ClaimRewardHandler).Assembly));
+
 // CORS for Mini App
 builder.Services.AddCors(options =>
 {
@@ -249,6 +259,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddRateLimiting(builder.Configuration);
 // Register Application Layer Services
 builder.Services.AddScoped<JoinQuestHandler>();
+builder.Services.AddScoped<ClaimRewardHandler>();
+builder.Services.AddScoped<CompleteChallengeHandler>();
 var app = builder.Build();
 
 using (IServiceScope scope = app.Services.CreateScope())

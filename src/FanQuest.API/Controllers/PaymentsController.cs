@@ -1,4 +1,5 @@
 ﻿using FanQuest.API.Contract;
+using FanQuest.API.Extensions;
 using FanQuest.Application.UseCases.ClaimReward;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -47,8 +48,7 @@ namespace FanQuest.API.Controllers
 
         private Guid GetUserId()
         {
-            // TODO: Extract from JWT
-            return Guid.NewGuid(); // Mock
+            return User.GetUserId();
         }
     }
 }

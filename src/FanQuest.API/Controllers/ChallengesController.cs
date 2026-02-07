@@ -1,4 +1,5 @@
 ﻿using FanQuest.API.Contract;
+using FanQuest.API.Extensions;
 using FanQuest.Application.DTOs;
 using FanQuest.Application.Interfaces.Repositories;
 using FanQuest.Application.UseCases.CompleteChallenge;
@@ -77,8 +78,7 @@ namespace FanQuest.API.Controllers
 
         private Guid GetUserId()
         {
-            // TODO: Extract from JWT
-            return Guid.NewGuid(); // Mock
+            return User.GetUserId();
         }
     }
 }
